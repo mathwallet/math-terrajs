@@ -13,33 +13,39 @@
     <script src="https://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script type="text/javascript">
-        var network = {
-            blockchain: "cosmos"
-        };
-        var account = null
+
+        var address = null
 
         function login() {
+            if (window.mathExtension == undefined){
+                alert("Please install mathwallet extension first!");
+                return;
+            }
             // Request Login
             // Response ->:
             // identity = {
             //     account: "terra13jqgrtqwucx4jdvhg0d4tc80892fscx54298yt",
             //     blockchain: "terra13jqgrtqwucx4jdvhg0d4tc80892fscx54298yt"
             // }
-            mathExtension.getIdentity(network).then(identity => {
+            window.mathExtension.getIdentity({ blockchain: "terra" }).then(identity => {
                 document.getElementById("loginDiv").innerHTML = JSON.stringify(identity);
-                account = identity.account;
+                address = identity.account;
             }).catch(e => {
                 console.log(e);
             })
         }
         function logout() {
-            mathExtension.forgetIdentity().then(response => {
+            window.mathExtension.forgetIdentity().then(response => {
                 console.log(response);
             }).catch(e => {
                 console.log(e);
             })
         }
         function signTransaction() {
+            if (!address){
+                alert("login first!");
+                return;
+            }
             // Transfer
             var transaction = {
                 chain_id: "columbus-4",
@@ -59,7 +65,7 @@
                     {
                         type:"cosmos-sdk/MsgSend",
                         value:{
-                            from_address:"terra13jqgrtqwucx4jdvhg0d4tc80892fscx54298yt",
+                            from_address: address,
                             to_address:"terra13jqgrtqwucx4jdvhg0d4tc80892fscx54298yt",
                             amount: [
                                 {
@@ -80,7 +86,7 @@
             //          "value":"A96G4fcYq+NDwMD1e95Iob7jNsPDasXeOrou/PcKIux5"
             //     }
             //  }
-            mathExtension.requestSignature(transaction).then(signature => {
+            window.mathExtension.requestSignature(transaction).then(signature => {
                 console.log(signature);
                 document.getElementById("signatureDiv").innerHTML = JSON.stringify(signature);
             }).catch(e => {
@@ -88,6 +94,12 @@
             })
         }
         function signMessage() {
+            if (!address){
+                alert("login first!");
+                return;
+            }
+
+            
             var message = "hello world";
             
             // Message Signature
@@ -99,7 +111,7 @@
             //          "value":"A96G4fcYq+NDwMD1e95Iob7jNsPDasXeOrou/PcKIux5"
             //     }
             //  }
-            mathExtension.requestArbitrarySignature(account,message, "title",false).then(signedMessge => {
+            window.mathExtension.requestArbitrarySignature(address,message, "title",false).then(signedMessge => {
                 console.log(JSON.stringify(signedMessge));
                 document.getElementById("messageSignatureDiv").innerHTML = JSON.stringify(signedMessge);
             }).catch(e => {
